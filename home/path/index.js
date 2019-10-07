@@ -14,8 +14,6 @@ const name3 = path.extname(filename)  //返回后缀名
 console.log(name)
 console.log(name2)
 console.log(name3)
-console.log(name3)
-console.log(name3)
 fs.readFile(filename,(err,data)=>{
     if(err) return console.log(err) ;
     //console.log(data.toString())

@@ -152,5 +152,74 @@ require函数支持斜杠（/）或盘符（C：）开头的绝对路径，也�
     `
     let bin = new Buffer('hello','utf-8')
     `
-    `buffer`与字符串有一个重要区别。字符串是只读的，并且对字符串的任何修改得到的都是一个新字符串，原字符串保持不变。至于`buffer`，更像是可以做指针操作的C语言数组。ps： 可以用【index】方式直接修改某个位置的字节
-    而`.splice`方法也不是返回一个新的`buffer`，而更像是返回了指定原`buffer`中间的某个位置的指针。
+  `buffer`与字符串有一个重要区别。字符串是只读的，并且对字符串的任何修改得到的都是一个新字符串，原字符串保持不变。至于`buffer`，更像是可以做指针操作的C语言数组。ps： 可以用【index】方式直接修改某个位置的字节
+  而`.splice`方法也不是返回一个新的`buffer`，而更像是返回了指定原`buffer`中间的某个位置的指针。
+
+
+### ***stream***
+当内存中无法一次装下需要处理的数据时，或者一边读取一边处理更加高效时，我们就需要用到数据流。Nodejs中通过各种`stream`来提供对数据流的操作。
+以上边的大文件拷贝程序为例，我们可以为数据来源创建一个只读数据流，实例
+> `
+  let rs = fs.createReadStream(pathname)
+  rs.on('data',function(chunk){
+    doSomething(chunk)
+  })
+  rs.on('end',function(){
+    cleanUp()
+  })
+`
+
+***ps:Stream基于事件机制工作，所有stream的实例都继承与Nodejs提供的EventEmitter***
+上边的代码中`data`事件会源源不断的被处罚，不管`dosomething`函数是否处理得过来。代码可以继续做如下改造。
+> `
+let rs = fs.createReadStream(src)
+rs.on('data',(chunk) => {
+  rs.pause()
+  doSomething(chunk,() => {
+    rs.resume()
+  })
+})
+rs.on('end',() => {
+  cleanUp()
+})
+`
+
+以上代码给`doSomething`函数加了回调，因此我们可以在处理数据前暂停数据读取，并在处理数据后继续读取数据
+此外，我们也可以为数据模板创建一个只写数据流，示例如下：
+>`
+ let rs = fs.createReadStream(src)
+ let ws = fs.createWriteSteam(dst)
+ rs.on('data',(chunk) => {
+   ws.write(chunk)
+ })
+ rs.on('end',() =>{
+   ws.end()
+ })
+`
+
+>ps:Steam基于事件机制工作，所有`stream`的实例都继承与nodejs提供的EventEmitter
+
+上边的代码中`data`事件会源源不断的被触发，不管dosomething函数是否处理得过来。
+
+>`
+  let rs = fs.createReadStream(src)
+  rs.on('data',(chunk) => {
+    rs.pause()
+    doSomething(chunk, () => {
+      rs.resume()
+    })
+  })
+`
+
+### File System (文件系统)
+
+NodeJs通过`fs`内置模块提供对文件的操作。fs模块提供的Api基本上可以分为以下三类：
+* 文件属性读写
+  其中常用的有`fs.stat`、`fs.chmod`、`fs.chown`等等
+* 文件内容读写
+  其中常用的有`fs.readFile`、`fs.readdir`、`fs.mkdir`等等
+* 底层文件操作
+  其中常用的有`fs.open`、`fs.read`、`fs.close`等等
+
+Nodejs最精华的异步IO模型在`fs`模块里有着充分的提现，例如上边提到的这些API都通过回调函数传递结果。以`fs.readFile`为例
+如上边代码所示，基本上所有`fs`模块api的回调参数都有两个。第一个参数是再有错误发生时等于异常对象，第二个参数始终用于返回api方法执行结果

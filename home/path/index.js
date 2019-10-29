@@ -18,3 +18,28 @@ fs.readFile(filename,(err,data)=>{
     if(err) return console.log(err) ;
     //console.log(data.toString())
 })
+
+
+let cache = {}
+function store(key,value) {
+    cache[path.normalize(key)] = value
+}
+store('foo/bar',1)
+console.log(cache)
+store('..//foo//../bar',2)
+console.log(cache)
+
+
+function travel(dir,callback){
+    fs.readFileSync(dir).forEach( file => {
+        let pathName = path.join(dir,file)
+        if(fs.statSync(pathName).isDirectory){
+            travel(pathName,callback)
+        }else{
+            callback(pathName)
+        }
+    })
+}
+travel('../../home',(pathName) => {
+    console.log(pathName)
+})

@@ -309,3 +309,10 @@ Content-Type: application/x-www-form-urlencoded
 
 ***Net***
 `net`模块可用于创建socket服务器或socket客户端。由于socket在前端领域的使用范围还不是很广。
+
+
+### 进程管理
+
+Nodejs可以感知和控制自身进程的运行环境和状态，也可以创建子进程并与其协同工作，这使得Nodejs可以吧多个程序组合在一起共同完成某项工作，并在其中充当胶水和调度器的作用
+
+>nodejs自带的`fs`模块比较基础，把一个目录里的所有文件和子目录都copy到另一个目录里需要些不少代码，但我看看nodej调用终端命令来简化目录拷贝。
